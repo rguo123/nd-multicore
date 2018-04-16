@@ -1,0 +1,9 @@
+[Default]
+protocol = https
+host = api.boss.neurodata.io
+token = <token_key>
+
+[Parallel]
+collection = collman
+experiment = collman15v2
+channels = chan1,chan2,chan3,no,spaces
