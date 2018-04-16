@@ -29,7 +29,7 @@ def compute_blocks(resource, x_start = 0,
     if z_end == None:
         z_end = z
 
-    block_size = (1000, 1000, 10)
+    block_size = (100, 100, 100)
     blocks = intern.block_compute(x_start, x_end, y_start, y_end, z_start, z_end, (0, 0, 0), block_size)
     ### IMPORTANT blocks are returned as x, y, z ###
     for i in range(len(blocks)):
