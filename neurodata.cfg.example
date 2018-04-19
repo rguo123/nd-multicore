@@ -7,3 +7,6 @@ token = <token_key>
 collection = collman
 experiment = collman15v2
 channels = chan1,chan2,chan3,no,spaces
+x_range = 0,1000
+y_range = 0,1000
+z_range = 0,99

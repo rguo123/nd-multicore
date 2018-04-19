@@ -4,18 +4,32 @@ from intern.resource.boss.resource import ChannelResource, ExperimentResource, C
 import configparser
 
 class NeuroDataResource:
-    def __init__(self, host, token, collection, experiment, requested_channels):
+    def __init__(self, host, token, collection, experiment, requested_channels,
+                 x_range,
+                 y_range,
+                 z_range):
+
         self._bossRemote = BossRemote({'protocol': 'https',
                                        'host': host,
                                        'token': token})
         self.collection = collection
         self.experiment = experiment
+
+        self.channels = self._bossRemote.list_channels(collection, experiment)
+
         if len(requested_channels) == 0:
             self.requested_channels = self.channels
         else:
             self.requested_channels = requested_channels
-        self.channels = self._bossRemote.list_channels(collection, experiment)
+            
         self._get_coord_frame_details()
+        # validate range
+        if not self.correct_range(z_range, y_range, x_range):
+            raise Exception("Error: Inccorect dimension range")
+
+        self.x_range = x_range
+        self.y_range = y_range
+        self.z_range = z_range
 
 
     def _get_coord_frame_details(self):
@@ -68,32 +82,74 @@ class NeuroDataResource:
         else:
             return data.astype(datatype)
 
+    def correct_range(self, z_range, y_range, x_range):
+        x_start, x_end = x_range
+        if x_start < 0 or x_end > self.max_dimensions[2]:
+            return False
+        y_start, y_end = y_range
+        if y_start < 0 or y_end > self.max_dimensions[1]:
+            return False
+        z_start, z_end = z_range
+        if z_start < 0 or z_end > self.max_dimensions[0]:
+            return False
+        return True
+
 '''
     Parses .cfg files for BOSS metadata
+
+    Input:
+        boss_config_file neurodata.cfg file
+    Output:
+        Dictionary of Boss metadata
 '''
 def get_boss_config(boss_config_file):
     config = configparser.ConfigParser()
     config.read(boss_config_file)
-
+    # dictionary of BOSS metadata
     remote_metadata = {}
+    # BOSS API
     remote_metadata["token"] = config['Default']['token']
+    # BOSS Host
     remote_metadata["host"] = config['Default']['host']
+    # Boss experiment
     remote_metadata["experiment"] = config['Parallel']['experiment']
+    # Boss collection
     remote_metadata["collection"] = config['Parallel']['collection']
-
+    # Boss channels
     channels = config["Parallel"]["channels"]
     channels = channels.split(",")
     remote_metadata["channels"] = channels
+    # Parse x_range
+    x_range = config["Parallel"]["x_range"]
+    x_range = x_range.split(",")
+    remote_metadata["x_range"] = list(map(int, x_range))
+    # Parse y_range
+    y_range = config["Parallel"]["y_range"]
+    y_range = y_range.split(",")
+    remote_metadata["y_range"] = list(map(int, y_range))
+    # Parse z_range
+    z_range = config["Parallel"]["z_range"]
+    z_range = z_range.split(",")
+    remote_metadata["z_range"]= list(map(int, z_range))
+
     return remote_metadata
 
 '''
     Instantiate resource
+
+    Input:
+        config_file path and name of neurodata.cfg file
+    Output:
+        NeuroData resource
 '''
 def get_boss_resource(config_file):
     config = get_boss_config(config_file)
-    resource = create_resource(config)
-    return resource
-
-def create_resource(config):
-    resource = NeuroDataResource(config["host"], config["token"], config["collection"], config["experiment"], config["channels"])
+    resource = NeuroDataResource(config["host"],
+                                 config["token"],
+                                 config["collection"],
+                                 config["experiment"],
+                                 config["channels"],
+                                 config["x_range"],
+                                 config["y_range"],
+                                 config["z_range"])
     return resource
