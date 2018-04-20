@@ -21,11 +21,11 @@ class NeuroDataResource:
             self.requested_channels = self.channels
         else:
             self.requested_channels = requested_channels
-            
-        self._get_coord_frame_details()
+
+        #self._get_coord_frame_details()
         # validate range
-        if not self.correct_range(z_range, y_range, x_range):
-            raise Exception("Error: Inccorect dimension range")
+        #if not self.correct_range(z_range, y_range, x_range):
+        #    raise Exception("Error: Inccorect dimension range")
 
         self.x_range = x_range
         self.y_range = y_range

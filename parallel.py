@@ -17,7 +17,6 @@ import numpy as np
         block_size  (x, y, z) specifying size of blocks
 '''
 def compute_blocks(resource, block_size):
-    z_max, y_max, x_max = resource.max_dimensions
 
     x_start, x_end = resource.x_range
     y_start, y_end = resource.y_range
